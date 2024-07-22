@@ -8,7 +8,7 @@ import torch
 import pandas
 import pyfaidx
 
-from bpnetlite.io import one_hot_encode
+from tangermeme.utils import one_hot_encode
 from joblib import Parallel, delayed
 
 def extract_fasta(filename, chroms, n_jobs=-1):
