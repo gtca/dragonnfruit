@@ -71,7 +71,7 @@ class DragoNNFruit(torch.nn.Module):
     """
 
     def __init__(self, bias, accessibility, name, verbose=True):
-        super(DragoNNFruit, self).__init__()
+        super().__init__()
 
         for parameter in bias.parameters():
             parameter.requires_grad = False
@@ -373,10 +373,10 @@ class DragoNNFruit(torch.nn.Module):
             if i == max_iter:
                 break
 
-            X = X.cuda().type(torch.float32)
-            y = y.cuda()
-            cell_states = cell_states.cuda()
-            read_depths = read_depths.cuda()
+            X = X.type(torch.float32)
+            y = y
+            cell_states = cell_states
+            read_depths = read_depths
 
             train_loss = self._train_step(
                 X, cell_states, read_depths, y, optimizer, dtype
@@ -391,7 +391,7 @@ class DragoNNFruit(torch.nn.Module):
                 # Make predictions on the validation set
                 y_hat = predict(
                     self, X_valid, args=(c_valid, r_valid), batch_size=batch_size
-                ).cuda()
+                )
 
                 # Calculate MNLL loss
                 y_hat_ = torch.nn.functional.log_softmax(y_hat.flatten(), dim=-1)
@@ -482,7 +482,7 @@ class DynamicBPNet(torch.nn.Module):
     def __init__(
         self, controller, n_filters=128, n_layers=8, trimming=None, conv_bias=False
     ):
-        super(DynamicBPNet, self).__init__()
+        super().__init__()
 
         self.trimming = trimming or 2**n_layers + 37
         self.n_filters = n_filters
@@ -626,7 +626,7 @@ class CellStateController(torch.nn.Module):
     """
 
     def __init__(self, n_inputs, n_nodes=256, n_outputs=64, n_layers=0):
-        super(CellStateController, self).__init__()
+        super().__init__()
 
         self.n_inputs = n_inputs
         self.n_nodes = n_nodes
