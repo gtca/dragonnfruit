@@ -314,19 +314,19 @@ class DragoNNFruit(torch.nn.Module):
 
 		X_valid, y_valid, c_valid, r_valid = zip(*[validation_data[i]
 			for i in range(n_validation_samples)])
-		X_valid = torch.stack(X_valid).cuda().type(torch.float32)
-		y_valid = torch.stack(y_valid).cuda().type(torch.float32)
-		c_valid = torch.stack(c_valid).cuda()
-		r_valid = torch.stack(r_valid).cuda()
+		X_valid = torch.stack(X_valid).type(torch.float32)
+		y_valid = torch.stack(y_valid).type(torch.float32)
+		c_valid = torch.stack(c_valid)
+		r_valid = torch.stack(r_valid)
 
 		start, best_corr = time.time(), 0
 		self.logger.start()
 		for epoch in range(max_epochs):
 			for i, (X, y, cell_states, read_depths) in enumerate(training_data):
-				X = X.cuda().type(torch.float32)
-				y = y.cuda()
-				cell_states = cell_states.cuda()
-				read_depths = read_depths.cuda()
+				X = X.type(torch.float32)
+				y = y
+				cell_states = cell_states
+				read_depths = read_depths
 
 				train_loss = self._train_step(X, cell_states, read_depths, y,
 					optimizer)
