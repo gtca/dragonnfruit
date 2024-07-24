@@ -19,7 +19,7 @@ The most flexible way of using DragoNNFruit is through the Python API. Here, a m
 
 ```python
 from dragonnfruit.io import LocusGenerator
-from dragonnfruit.io import GWGenerator
+from dragonnfruit.io import GenomewideGenerator
 
 from dragonnfruit.models import CellStateController
 from dragonnfruit.models import DynamicBPNet
@@ -42,14 +42,14 @@ for chrom in ['chr1', 'chr2']:
 
 
 X = torch.utils.data.DataLoader(
-	GWGenerator(
+	GenomewideGenerator(
 		sequence=sequence,
 		signal=signal,
 		neighbors=neighbors,
 		cell_states=cell_states,
 		read_depths=read_depths,
 		trimming=(2114 - 1000) // 2, 
-		window=1000, 
+		window=2114, 
 		chroms=['chr1'],
 		random_state=None),
 	pin_memory=True, 
@@ -65,7 +65,7 @@ X_valid = LocusGenerator(
 	cell_states=cell_states,
 	read_depths=read_depths,
 	trimming=(2114 - 1000) // 2, 
-	window=1000,
+	window=2114,
 	chroms=['chr2'],
 	random_state=0)
 
