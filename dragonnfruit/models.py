@@ -369,9 +369,12 @@ class DragoNNFruit(torch.nn.Module):
         start, best_corr = time.time(), 0
         self.logger.start()
 
+        iteration = 0
         for i, (X, y, cell_states, read_depths) in enumerate(training_data):
             if i == max_iter:
                 break
+
+            iteration = i
 
             X = X.type(torch.float32)
             y = y
@@ -383,14 +386,19 @@ class DragoNNFruit(torch.nn.Module):
             )
 
             if i % validation_iter == 0:
-                scheduler.step()
+                if scheduler is not None:
+                    scheduler.step()
 
                 train_time = time.time() - start
                 tic = time.time()
 
                 # Make predictions on the validation set
                 y_hat = predict(
-                    self, X_valid, args=(c_valid, r_valid), batch_size=batch_size
+                    self,
+                    X_valid,
+                    args=(c_valid, r_valid),
+                    batch_size=batch_size,
+                    device=None,
                 )
 
                 # Calculate MNLL loss
@@ -434,7 +442,7 @@ class DragoNNFruit(torch.nn.Module):
 
                 start = time.time()
 
-        torch.save(self, "{}.{}.torch".format(self.name, epoch))
+        torch.save(self, "{}.{}.torch".format(self.name, iteration))
 
 
 class DynamicBPNet(torch.nn.Module):
