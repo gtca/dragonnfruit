@@ -278,6 +278,7 @@ class DragoNNFruit(torch.nn.Module):
         batch_size=64,
         validation_iter=100,
         dtype=torch.bfloat16,
+        device=None,
     ):
         """Fit an entire DragoNNFruit model to the data.
 
@@ -356,15 +357,19 @@ class DragoNNFruit(torch.nn.Module):
                 train at full precision. Setting to `torch.float16` is generally
                 not stable and so it is advised to use `torch.bfloat16` instead.
                 Default is `torch.bfloat16`.
+
+        device: torch.device, optional
+                The device to train on. Default is None.
+                TODO: should be refactored.
         """
 
         X_valid, y_valid, c_valid, r_valid = zip(
             *[validation_data[i] for i in range(n_valid)]
         )
-        X_valid = torch.stack(X_valid).type(torch.float32)
-        y_valid = torch.stack(y_valid).type(torch.float32)
-        c_valid = torch.stack(c_valid)
-        r_valid = torch.stack(r_valid)
+        X_valid = torch.stack(X_valid).to(device).type(torch.float32)
+        y_valid = torch.stack(y_valid).to(device).type(torch.float32)
+        c_valid = torch.stack(c_valid).to(device)
+        r_valid = torch.stack(r_valid).to(device)
 
         start, best_corr = time.time(), 0
         self.logger.start()
@@ -376,10 +381,10 @@ class DragoNNFruit(torch.nn.Module):
 
             iteration = i
 
-            X = X.type(torch.float32)
-            y = y
-            cell_states = cell_states
-            read_depths = read_depths
+            X = X.to(device).type(torch.float32)
+            y = y.to(device)
+            cell_states = cell_states.to(device)
+            read_depths = read_depths.to(device)
 
             train_loss = self._train_step(
                 X, cell_states, read_depths, y, optimizer, dtype
@@ -398,8 +403,8 @@ class DragoNNFruit(torch.nn.Module):
                     X_valid,
                     args=(c_valid, r_valid),
                     batch_size=batch_size,
-                    device=None,
-                )
+                    device=device,
+                ).to(device)
 
                 # Calculate MNLL loss
                 y_hat_ = torch.nn.functional.log_softmax(y_hat.flatten(), dim=-1)
