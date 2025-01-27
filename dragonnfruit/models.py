@@ -373,7 +373,6 @@ class DragoNNFruit(torch.nn.Module):
         self.logger.start()
 
         iteration = 0
-        
         for i, (X, y, cell_states, read_depths) in enumerate(training_data):
             if i == max_iter:
                 break
@@ -494,7 +493,6 @@ class DynamicBPNet(torch.nn.Module):
         self, controller, n_filters=128, n_layers=8, trimming=None, conv_bias=False
     ):
         super().__init__()
-        super(DynamicBPNet, self).__init__()
 
         self.trimming = trimming or 2**n_layers + 37
         self.n_filters = n_filters
