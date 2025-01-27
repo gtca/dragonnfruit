@@ -12,12 +12,22 @@ from tangermeme.utils import one_hot_encode
 from joblib import Parallel, delayed
 
 
+<<<<<<< HEAD
 def extract_fasta(filename, chroms, n_jobs=-1):
     """Extract and one-hot encode chromosomes from a FASTA file in parallel.
 
     This function will take in a FASTA file and a set of chromosomes and, in
     parallel, will one-hot encode the chromosomes and return a dictionary
     with the extracted values.
+=======
+def extract_fasta(filename, chroms):
+    """Extract and one-hot encode chromosomes from a FASTA file.
+
+    This function will take in a FASTA file and a set of chromosomes and will
+    one-hot encode the chromosomes and return a dictionary with the extracted
+    values. Importantly, this function will return numpy arrays rather than
+    torch tensors for easier slicing in subsequent functions.
+>>>>>>> 011928e (Do not use cuda as a default + black formatting)
 
 
     Parameters
@@ -27,6 +37,7 @@ def extract_fasta(filename, chroms, n_jobs=-1):
 
     chroms: list or tuple
             A set of chromosomes to return one-hot encodings for.
+<<<<<<< HEAD
 
     n_jobs: int, optional
             The number of jobs to process in parallel.
@@ -46,6 +57,26 @@ def extract_fasta(filename, chroms, n_jobs=-1):
     ohes = Parallel(n_jobs=n_jobs)(f(fa[chrom][:].seq.upper()) for chrom in chroms)
 
     return {chrom: ohe for chrom, ohe in zip(chroms, ohes)}
+=======
+
+
+    Returns
+    -------
+    ohes: dict
+            A dictionary where the keys are the chromosomes and the values are the
+            one-hot encodings.
+    """
+
+    fa = pyfaidx.Fasta(filename)
+    d = {}
+
+    for chrom in chroms:
+        seq = fa[chrom][:].seq.upper()
+        ohe = one_hot_encode(seq).numpy()
+        d[chrom] = ohe
+
+    return d
+>>>>>>> 011928e (Do not use cuda as a default + black formatting)
 
 
 def _extract_example(self, chrom, mid, cell_idx, idx):
@@ -133,10 +164,18 @@ class LocusGenerator(torch.utils.data.Dataset):
 
     Parameters
     ----------
+<<<<<<< HEAD
     sequences: dict of torch.tensors, shape=(n, 4), dtype=torch.float32
             A dictionary of the nucleotide sequences to use. Generally, `n` is the
             size of a chromosome because the entire genome is being loaded into
             memory.
+=======
+    sequences: dict of numpy.ndarrays, shape=(n, 4), dtype=numpy.int8
+            A dictionary of the nucleotide sequences to use. Generally, `n` is the
+            size of a chromosome because the entire genome is being loaded into
+            memory. This is a numpy array to allow for faster slicing in subsequent
+            functions.
+>>>>>>> 011928e (Do not use cuda as a default + black formatting)
 
     signals: dict of scipy.sparse.csc_matrix, shape=(n, n_cells)
             A dictionary of the cell signals, where `n` is generally the size of
@@ -148,6 +187,7 @@ class LocusGenerator(torch.utils.data.Dataset):
             Each file should essentially be a set of coordinates to sample. These
             coordinates are shuffled and interleaved for sampling.
 
+<<<<<<< HEAD
     neighbors: torch.tensor, shape=(n_cells, n_neighbors)
             A tensor of integers where each row is a cell, column i corresponds to
             the i-th nearest neighbor, and the value is the integer index of the
@@ -158,6 +198,19 @@ class LocusGenerator(torch.utils.data.Dataset):
 
     read_depths: torch.tensor, shape=(n_cells, 1)
             A tensor of read depths for each cell. Rather than being the sum of
+=======
+    neighbors: numpy.ndarray, shape=(n_cells, n_neighbors)
+            An array of integers where each row is a cell, column i corresponds to
+            the i-th nearest neighbor, and the value is the integer index of the
+            cell that is that neighbor.
+
+    cell_states: numpy.ndarray, shape=(n_cells, n_dims)
+            An array of representations for each cell where each row is a cell and
+            each dimension is a feature in the representation for that cell.
+
+    read_depths: numpy.ndarray, shape=(n_cells, 1)
+            A numpy.ndarray of read depths for each cell. Rather than being the sum of
+>>>>>>> 011928e (Do not use cuda as a default + black formatting)
             counts across the cell, this is usually log2(x+1) of that count, but
             can be whatever the user wants.
 

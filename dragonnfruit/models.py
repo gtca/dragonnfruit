@@ -357,10 +357,8 @@ class DragoNNFruit(torch.nn.Module):
                 train at full precision. Setting to `torch.float16` is generally
                 not stable and so it is advised to use `torch.bfloat16` instead.
                 Default is `torch.bfloat16`.
-
         device: torch.device, optional
                 The device to train on. Default is None.
-                TODO: should be refactored.
         """
 
         X_valid, y_valid, c_valid, r_valid = zip(
@@ -375,6 +373,7 @@ class DragoNNFruit(torch.nn.Module):
         self.logger.start()
 
         iteration = 0
+        
         for i, (X, y, cell_states, read_depths) in enumerate(training_data):
             if i == max_iter:
                 break
@@ -449,7 +448,6 @@ class DragoNNFruit(torch.nn.Module):
 
         torch.save(self, "{}.{}.torch".format(self.name, iteration))
 
-
 class DynamicBPNet(torch.nn.Module):
     """A BPNet model whose weights are modified by an external factor.
 
@@ -496,6 +494,7 @@ class DynamicBPNet(torch.nn.Module):
         self, controller, n_filters=128, n_layers=8, trimming=None, conv_bias=False
     ):
         super().__init__()
+        super(DynamicBPNet, self).__init__()
 
         self.trimming = trimming or 2**n_layers + 37
         self.n_filters = n_filters

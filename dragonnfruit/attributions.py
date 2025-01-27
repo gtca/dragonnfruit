@@ -12,7 +12,7 @@ from bpnetlite.chrombpnet import _Exp
 
 
 from tangermeme.ersatz import dinucleotide_shuffle
-from tangermeme.product import apply_product
+from tangermeme.product import apply_pairwise
 from tangermeme.deep_lift_shap import deep_lift_shap
 from tangermeme.deep_lift_shap import hypothetical_attributions
 from tangermeme.deep_lift_shap import _nonlinear
@@ -63,12 +63,15 @@ class CountWrapper(torch.nn.Module):
     def __init__(self, model):
         super(CountWrapper, self).__init__()
         self.model = model
-        self.exp = _Exp
-        self.log = _Log
+        self.exp = _Exp()
+        self.log = _Log()
 
     def forward(self, X, *args):
         logits = self.model(X, *args)
-        return self.log(self.exp(logits).sum(dim=-1, keepdims=True))
+        # return torch.logsumexp(logits, dim=-1, keepdims=True)
+        logits_mean = torch.mean(logits, dim=-1, keepdims=True)
+        elogits = self.exp(logits - logits_mean).sum(dim=-1, keepdims=True)
+        return self.log(elogits) + logits_mean
 
 
 def deep_lift_shap_cross(
@@ -214,13 +217,14 @@ def deep_lift_shap_cross(
     elif model_output == "counts":
         wrapper = CountWrapper(model)
     else:
-        raise ValueError("model_output must be None, 'profile' or 'count'.")
+        raise ValueError("model_output must be None, 'profile' or 'counts'.")
 
-    args = (cell_states,) + (read_depths,) if read_depths is not None else ()
+    args = (cell_states,) + ((read_depths,) if read_depths is not None else ())
 
-    X_attr = apply_product(
+    X_attr = apply_pairwise(
         deep_lift_shap,
         wrapper,
+        X,
         args=args,
         target=0,
         batch_size=batch_size,
